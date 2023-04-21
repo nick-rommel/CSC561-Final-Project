@@ -18,19 +18,40 @@ class MyNet(nn.Module):
         return guess
     def trainloop(self,dataset,model,criterion,optimizer):
         running_loss = []
-        for data,labels in dataset:
+        running_accuracy = []
+        for i,data in enumerate(dataset):
+            num_correct = 0
+            num_samples = 0
+            inputs,labels = data
             optimizer.zero_grad()
-            pred = model(data)
+            pred = model(inputs)
             loss = criterion(pred,labels)
             loss.backward()
             optimizer.step()
+            _,predictions = pred.max(1)
+            num_correct += (predictions == labels).sum()
+            num_samples += predictions.size(0)
+            accuracy = float(num_correct/num_samples)*100
+            running_accuracy.append(accuracy)
             running_loss.append(loss.item())
+            print(f' Training Batch {i+1}: {accuracy}')
         return running_loss
     def validationloop(self,dataset,model,criterion):
         running_loss = []
-        for data,labels in dataset:
-            pred = model(data)
+        running_accuracy = []
+        for i,data in enumerate(dataset):
+            num_correct = 0
+            num_samples = 0
+            inputs,labels = data
+            pred = model(inputs)
             loss = criterion(pred,labels)
             running_loss.append(loss.item())
+            _,predictions = pred.max(1)
+            num_correct += (predictions == labels).sum()
+            num_samples += predictions.size(0)
+            accuracy = float(num_correct/num_samples)*100
+            running_accuracy.append(accuracy)
+            print(f'Validation: {accuracy}\n')
         return running_loss
     
+
