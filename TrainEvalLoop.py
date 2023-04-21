@@ -7,11 +7,10 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     losses = []
     vlosses = []
     for epoch in range(5):
+        print(f'Epoch# {epoch+1}')
         Network.train()
         average_training_loss = Network.trainloop(train_loader,Network,criterion,optimizer)
         losses.extend(average_training_loss)
         Network.eval()
         average_validation_loss = Network.validationloop(val_loader,Network,criterion)
         vlosses.extend(average_validation_loss)
-        print(average_validation_loss)
-    print(vlosses)
