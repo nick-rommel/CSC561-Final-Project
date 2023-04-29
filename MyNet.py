@@ -35,7 +35,7 @@ class MyNet(nn.Module):
             running_accuracy.append(accuracy)
             running_loss.append(loss.item())
             print(f' Training Batch {i+1}: {accuracy}')
-        return running_loss
+        return running_loss,running_accuracy
     def validationloop(self,dataset,model,criterion):
         running_loss = []
         running_accuracy = []
@@ -52,6 +52,5 @@ class MyNet(nn.Module):
             accuracy = float(num_correct/num_samples)*100
             running_accuracy.append(accuracy)
             print(f'Validation: {accuracy}\n')
-        return running_loss
+        return running_loss,running_accuracy
     
-
