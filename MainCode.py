@@ -7,15 +7,13 @@ import time
 
 # function to invoke training on the model
 def train():
-    # TODO make this path system agnostic. easiest way to do it is to probably have the data in the local folder
-    #   This DOES require download the dataset locally and maintaining it that way.. i recommend configuring a .gitignore
-    path = 'C:/Users/alexa/Desktop/ELE_Masters/Spring_2023/CSC_561_Neural_Networks_and_Deep_Learning/MusicGenreClassification/GTZAN/images_original/'
+    # path to the dataset
+    path = 'C:/Masters/CSC561/Final Project/Code/CSC561-Final-Project/GTZAN/images_original/'
     
     # creating the dataloaders by invoking their function.
     # 64 images per patch, 800 train images, 100 validation, 99 test
     train_loader,val_loader,test_loader = CDL.CustomLoader(path,64,800,100,99)
     # instantiating the network.
-    # TODO explain the hard-coded values
     Network = VN(1,4*256)
 
     # training the network using the different dataloaders.

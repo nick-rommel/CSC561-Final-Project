@@ -4,6 +4,10 @@ import torch.nn as nn
 import torch
 import time
 
+
+# setting the device to GPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # This function acts as the main training loop for the model
 # It takes as input:
 #   Network: the model being used
@@ -27,7 +31,7 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
         ]
     # Using AdamW as the optimizer of choice. AdamW is often used as the optimizer in
     #   applications making use of the ViT, as it was used in ViT's introductory paper
-    optimizer = TO.AdamW(params = params,lr = LR)
+    optimizer = TO.AdamW(params = Network.parameters(),lr = LR)
 
     # delcaring lists to hold the loss values for use in the future.
     losses = []
@@ -35,13 +39,19 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     accuracy = []
     vaccuracy = []
 
+    # sending the model to the GPU
+    Network.to(device=device)
+
     # declaring variable for number of epochs.
-    num_epochs = 1
+    num_epochs = 10
 
     # Below is the actual training loop for the model.
     for epoch in range(num_epochs):
         # Printing which epoch we are on
         print(f'Epoch# {epoch+1}')
+
+        # printing the current device as a sanity check
+        # print(torch.cuda.get_device_name(0))
 
         # ensuring that the model is set to "train" mode
         Network.train()
@@ -53,14 +63,14 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
         losses.extend(average_training_loss)
         accuracy.extend(average_training_accuracy)
 
-        # changing the network to evaluation mode in order to calculate the validation accuracy
-        Network.eval()
-        with torch.no_grad():
-            average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
+    # changing the network to evaluation mode in order to calculate the validation accuracy
+    Network.eval()
+    with torch.no_grad():
+        average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
 
-        # appending the validation values to their respective lists.
-        vlosses.extend(average_validation_loss)
-        vaccuracy.extend(average_validation_accuracy)
+    # appending the validation values to their respective lists.
+    vlosses.extend(average_validation_loss)
+    vaccuracy.extend(average_validation_accuracy)
     
     # defining reporting metrics
     name = 'model_criteria'
@@ -73,10 +83,10 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     print(name,f'Duration:{dur:0.2f},Acuracy:{accuracy[-1]:.0f},vAcuracy:{vaccuracy[-1]:.0f}',flush = True)
 
     # writing these metrics to a file for later use.
-    filename = 'TrainTest.txt'
-    file = open(filename,'a',encoding='utf-8')
-    file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
-    file.close()
+    # filename = 'TrainTest.txt'
+    # file = open(filename,'a',encoding='utf-8')
+    # file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
+    # file.close()
 
 def trainloop(dataset,model,criterion,optimizer):
     # declaring lists for holding the intermediary metrics
@@ -95,6 +105,10 @@ def trainloop(dataset,model,criterion,optimizer):
         # initializing the gradients to 0.
         optimizer.zero_grad()
 
+        # sending the data to the GPU
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
         # executing the prediction and and calculating the loss
         pred = model(inputs)
         loss = criterion(pred,labels)
@@ -102,8 +116,8 @@ def trainloop(dataset,model,criterion,optimizer):
         optimizer.step()
 
         # calculating the accuracy
-        _,predictions = pred.max(1)
-        num_correct += (predictions == labels).sum()
+        _,predictions = pred.cpu().detach().max(1)
+        num_correct += (predictions == labels.cpu().detach()).sum()
         num_samples += predictions.size(0)
         accuracy = float(num_correct/num_samples)*100
 
@@ -136,19 +150,23 @@ def validationloop(dataset,model,criterion):
         num_samples = 0
         minibatch += 1
 
+        # sending the data to the GPU
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
         # exectuing the prediction and calculating the loss.
         pred = model(inputs)
         loss = criterion(pred,labels)
         running_loss.append(loss.item())
 
         # calculating the accuracy and recording it
-        _,predictions = pred.max(1)
-        num_correct += (predictions == labels).sum()
+        _,predictions = pred.cpu().detach().max(1)
+        num_correct += (predictions == labels.cpu().detach()).sum()
         num_samples += predictions.size(0)
         accuracy = float(num_correct/num_samples)*100
         running_accuracy.append(accuracy)
         end = time.time()
-        dur = end - time
+        dur = end - start
         print(f'Validation: {accuracy:0.0f}%, {dur:0.2f}seconds\n')
 
     # returning the calculated loss and accuracy lists
