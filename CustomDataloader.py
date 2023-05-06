@@ -1,7 +1,6 @@
 # import statements
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets,transforms
-from torch.nn import Sequential
 
 # function for setting up the different dataloaders for the train, val, and test data splits
 # Inputs:

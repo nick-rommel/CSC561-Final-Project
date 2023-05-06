@@ -82,14 +82,15 @@ def trainloop(dataset,model,criterion,optimizer):
     # declaring lists for holding the intermediary metrics
     running_loss = []
     running_accuracy = []
-
+    minibatch = 0
     # going through the data batches in the dataloader
-    for i,data in enumerate(dataset):
+    for inputs,labels in dataset:
         # for the accuracy calculation
+        start = time.time()
+        minibatch += 1
         num_correct = 0
         num_samples = 0
 
-        inputs,labels = data
 
         # initializing the gradients to 0.
         optimizer.zero_grad()
@@ -109,7 +110,9 @@ def trainloop(dataset,model,criterion,optimizer):
         # appending the training accuracy and loss
         running_accuracy.append(accuracy)
         running_loss.append(loss.item())
-        print(f' Training Batch {i+1}: {accuracy}')
+        end = time.time()
+        dur = end - start
+        print(f' Training Batch {minibatch+1}: {accuracy:0.0f}%, {dur:0.2f}seconds')
 
     # returning the lists of the calculated loss and accuracy
     return running_loss,running_accuracy
@@ -123,13 +126,15 @@ def validationloop(dataset,model,criterion):
     # declaring lists to hold the calculated metrics
     running_loss = []
     running_accuracy = []
+    minibatch = 0
 
     # loop for going through the batches 
-    for i,data in enumerate(dataset):
+    for inputs,labels in dataset:
         # for calculating the validation accuracy
+        start = time.time()
         num_correct = 0
         num_samples = 0
-        inputs,labels = data
+        minibatch += 1
 
         # exectuing the prediction and calculating the loss.
         pred = model(inputs)
@@ -142,7 +147,9 @@ def validationloop(dataset,model,criterion):
         num_samples += predictions.size(0)
         accuracy = float(num_correct/num_samples)*100
         running_accuracy.append(accuracy)
-        print(f'Validation: {accuracy}\n')
+        end = time.time()
+        dur = end - start
+        print(f'Validation: {accuracy:0.0f}%, {dur:0.2f}seconds\n')
 
     # returning the calculated loss and accuracy lists
     return running_loss,running_accuracy
