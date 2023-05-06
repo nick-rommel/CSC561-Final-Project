@@ -18,7 +18,7 @@ def train():
 
     # training the network using the different dataloaders.
     # learning rate = 0.05
-    TEL.TrainNetwork(Network,0.05,train_loader,val_loader,test_loader)
+    TEL.TrainNetwork(Network,0.001,train_loader,val_loader,test_loader)
 
 # this file is the "main" function of the project, and is the entry point for execution.
 if __name__ =='__main__':

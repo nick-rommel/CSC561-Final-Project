@@ -20,7 +20,6 @@ class VITNet(nn.Module):
                                                    nn.ReLU()) for i in range(NumberOfLayers)])
         self.output = nn.Linear(Neurons,10)
     
-    # TODO: Where is this function actually used?
     # definition of function to handle forward pass of the network.
     def forward(self,data):
         x = self.vit(data)

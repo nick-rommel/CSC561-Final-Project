@@ -31,7 +31,7 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
         ]
     # Using AdamW as the optimizer of choice. AdamW is often used as the optimizer in
     #   applications making use of the ViT, as it was used in ViT's introductory paper
-    optimizer = TO.AdamW(params = Network.parameters(),lr = LR)
+    optimizer = TO.AdamW(params = params,lr = LR)
 
     # delcaring lists to hold the loss values for use in the future.
     losses = []
@@ -43,7 +43,7 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     Network.to(device=device)
 
     # declaring variable for number of epochs.
-    num_epochs = 10
+    num_epochs = 20
 
     # Below is the actual training loop for the model.
     for epoch in range(num_epochs):
@@ -83,10 +83,10 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     print(name,f'Duration:{dur:0.2f},Acuracy:{accuracy[-1]:.0f},vAcuracy:{vaccuracy[-1]:.0f}',flush = True)
 
     # writing these metrics to a file for later use.
-    # filename = 'TrainTest.txt'
-    # file = open(filename,'a',encoding='utf-8')
-    # file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
-    # file.close()
+    filename = 'TrainTest.txt'
+    file = open(filename,'a',encoding='utf-8')
+    file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
+    file.close()
 
 def trainloop(dataset,model,criterion,optimizer):
     # declaring lists for holding the intermediary metrics
