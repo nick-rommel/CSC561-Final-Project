@@ -12,7 +12,7 @@ def train():
     path = 'C:/Users/alexa/Desktop/ELE_Masters/Spring_2023/CSC_561_Neural_Networks_and_Deep_Learning/MusicGenreClassification/GTZAN/images_original/'
     
     # creating the dataloaders by invoking their function.
-    train_loader,val_loader,test_loader = CDL.CustomLoader(path,64,800,100,99)
+    train_loader,val_loader,test_loader = CDL.CustomLoader(path,100,800,100,99)
     # instantiating the network.
     # TODO explain the hard-coded values
     Network = VN(1,4*256)
