@@ -21,10 +21,9 @@ class MyNet(nn.Module):
         # The output layer is just a linear activation 
         self.output = nn.Linear(Neurons,10)
     
-    # TODO: Where is this function actually used?
     # definition of function to handle forward pass of the network.
     def forward(self,data):
-        # TODO: Explain these hardcoded values
+        # these are the dimensions of the gztan images
         x = data.reshape(len(data),3,288,432)
         x = self.input(x)
         for layer in self.hidden:
