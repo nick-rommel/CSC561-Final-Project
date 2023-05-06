@@ -10,8 +10,11 @@ class VITNet(nn.Module):
         super(VITNet,self).__init__()
         # we initialize the vit_b_16, remake the 'head' then attach an MLP for analysis.
         # we can also just use the 'head' and disregard the MLP if we want.
-        # the input of the 'head' is locked to 768 based on the ViT outpu
+        # the input of the 'head' is locked to 768 based on the ViT output
+        # we set the requires_grad to false in order to tell the loss.backward() step not to look at those parameters
         self.vit = tvm.vit_b_16(weights = 'IMAGENET1K_V1')
+        for param in self.vit.parameters():
+            param.requires_grad = False
         self.vit.heads = nn.Linear(768,Neurons)
         self.hidden = nn.ModuleList([nn.Sequential(nn.Linear(Neurons,Neurons),
                                                    nn.ReLU()) for i in range(NumberOfLayers)])
