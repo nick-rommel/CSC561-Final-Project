@@ -30,11 +30,3 @@ class VITNet(nn.Module):
 
         # returning the network's output
         return guess
-    
-    # this function is the training loop for the model
-    # TODO: what even is the point of having this and the validation loop here?
-    # It takes as input:
-    #   dataset: the data being used, which corresponds to the specific dataloader
-    #   TODO model: why are you passing the model to itself????? can you not just self.___?
-    #   criterion: The loss function (cross-entropy)
-    #   optimizer: the optimizer being used.

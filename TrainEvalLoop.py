@@ -47,7 +47,7 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
         Network.train()
 
         # invoking the internal method defined for the training loop of the model
-        average_training_loss,average_training_accuracy = Network.trainloop(train_loader,Network,criterion,optimizer)
+        average_training_loss,average_training_accuracy = trainloop(train_loader,Network,criterion,optimizer)
 
         # appending returned values onto the end of their respective lists
         losses.extend(average_training_loss)
@@ -56,7 +56,7 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
         # changing the network to evaluation mode in order to calculate the validation accuracy
         Network.eval()
         with torch.no_grad():
-            average_validation_loss,average_validation_accuracy = Network.validationloop(val_loader,Network,criterion)
+            average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
 
         # appending the validation values to their respective lists.
         vlosses.extend(average_validation_loss)
@@ -77,3 +77,73 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     file = open(filename,'a',encoding='utf-8')
     file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
     file.close()
+
+def trainloop(dataset,model,criterion,optimizer):
+    # declaring lists for holding the intermediary metrics
+    running_loss = []
+    running_accuracy = []
+
+    # going through the data batches in the dataloader
+    for i,data in enumerate(dataset):
+        # for the accuracy calculation
+        num_correct = 0
+        num_samples = 0
+
+        inputs,labels = data
+
+        # initializing the gradients to 0.
+        optimizer.zero_grad()
+
+        # executing the prediction and and calculating the loss
+        pred = model(inputs)
+        loss = criterion(pred,labels)
+        loss.backward()
+        optimizer.step()
+
+        # calculating the accuracy
+        _,predictions = pred.max(1)
+        num_correct += (predictions == labels).sum()
+        num_samples += predictions.size(0)
+        accuracy = float(num_correct/num_samples)*100
+
+        # appending the training accuracy and loss
+        running_accuracy.append(accuracy)
+        running_loss.append(loss.item())
+        print(f' Training Batch {i+1}: {accuracy}')
+
+    # returning the lists of the calculated loss and accuracy
+    return running_loss,running_accuracy
+    
+# function used for calculating the validation accuracies and loss
+# takes as input:
+#   dataset: the dataloader
+#   model: the model being used
+#   criterion: the loss function (cross entropy)
+def validationloop(dataset,model,criterion):
+    # declaring lists to hold the calculated metrics
+    running_loss = []
+    running_accuracy = []
+
+    # loop for going through the batches 
+    for i,data in enumerate(dataset):
+        # for calculating the validation accuracy
+        num_correct = 0
+        num_samples = 0
+        inputs,labels = data
+
+        # exectuing the prediction and calculating the loss.
+        pred = model(inputs)
+        loss = criterion(pred,labels)
+        running_loss.append(loss.item())
+
+        # calculating the accuracy and recording it
+        _,predictions = pred.max(1)
+        num_correct += (predictions == labels).sum()
+        num_samples += predictions.size(0)
+        accuracy = float(num_correct/num_samples)*100
+        running_accuracy.append(accuracy)
+        print(f'Validation: {accuracy}\n')
+
+    # returning the calculated loss and accuracy lists
+    return running_loss,running_accuracy
+    
