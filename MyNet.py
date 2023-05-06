@@ -109,3 +109,4 @@ class MyNet(nn.Module):
         # returning the calculated loss and accuracy lists
         return running_loss,running_accuracy
     
+

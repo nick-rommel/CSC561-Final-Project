@@ -11,9 +11,11 @@ from torchvision import datasets,transforms
 # Returns:
 #  the three dataloaders.
 def CustomLoader(path,batch_size,train_size,val_size,test_size):
-    # transforming the input data
+    # transforming the input data 
+    # we need to resize the data to 224x224 to fit into the ViT
     transform = transforms.Compose([
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        transforms.Resize([224,224],antialias=True)
         ])
     
     # executing the data transform
