@@ -1,0 +1,7 @@
+import torchvision.models as tvm
+weights = tvm.ViT_B_16_Weights
+a = tvm.vit_b_16(weights = 'DEFAULT')
+for param in a.parameters():
+    param.requires_grad = False
+
+print(a.heads)

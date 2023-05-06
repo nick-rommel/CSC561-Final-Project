@@ -1,7 +1,7 @@
 # import statements
 # importing the other files in this folder hierarchy
 import CustomDataloader as CDL
-from MyNet import MyNet as MN
+from VITNet import VITNet as VN
 import TrainEvalLoop as TEL
 import time
 
@@ -15,7 +15,7 @@ def train():
     train_loader,val_loader,test_loader = CDL.CustomLoader(path,64,800,100,99)
     # instantiating the network.
     # TODO explain the hard-coded values
-    Network = MN(2,4*256)
+    Network = VN(2,4*256)
 
     # training the network using the different dataloaders.
     TEL.TrainNetwork(Network,0.05,train_loader,val_loader,test_loader)

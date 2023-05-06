@@ -1,6 +1,7 @@
 # import statements
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets,transforms
+from torch.nn import Sequential
 
 # function for setting up the different dataloaders for the train, val, and test data splits
 # Inputs:
@@ -11,9 +12,11 @@ from torchvision import datasets,transforms
 # Returns:
 #  the three dataloaders.
 def CustomLoader(path,batch_size,train_size,val_size,test_size):
-    # transforming the input data
+    # transforming the input data 
+    # we need to resize the data to 224x224 to fit into the ViT
     transform = transforms.Compose([
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        transforms.Resize([224,224],antialias=True)
         ])
     
     # executing the data transform

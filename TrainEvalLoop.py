@@ -18,9 +18,16 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     # variable for invoking loss calculations
     criterion = nn.CrossEntropyLoss(reduction='mean')
 
+    # in order to only train the 'head', hidden, and output layers, we define the parameters for the optimizer as such
+    # this means the ViT isn't updated as the model learns.
+    params = [
+        {'params':Network.vit.heads.parameters()},
+        {'params':Network.hidden.parameters()},
+        {'params':Network.output.parameters()}
+        ]
     # Using AdamW as the optimizer of choice. AdamW is often used as the optimizer in
     #   applications making use of the ViT, as it was used in ViT's introductory paper
-    optimizer = TO.AdamW(params = Network.parameters(),lr = LR)
+    optimizer = TO.AdamW(params = params,lr = LR)
 
     # delcaring lists to hold the loss values for use in the future.
     losses = []
