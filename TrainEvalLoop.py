@@ -112,7 +112,7 @@ def trainloop(dataset,model,criterion,optimizer):
         running_loss.append(loss.item())
         end = time.time()
         dur = end - start
-        print(f' Training Batch {minibatch+1}: {accuracy:0.0f}%, {dur:0.2f}seconds')
+        print(f' Training Batch {minibatch}: {accuracy:0.0f}%, {dur:0.0f}seconds')
 
     # returning the lists of the calculated loss and accuracy
     return running_loss,running_accuracy
@@ -148,7 +148,7 @@ def validationloop(dataset,model,criterion):
         accuracy = float(num_correct/num_samples)*100
         running_accuracy.append(accuracy)
         end = time.time()
-        dur = end - start
+        dur = end - time
         print(f'Validation: {accuracy:0.0f}%, {dur:0.2f}seconds\n')
 
     # returning the calculated loss and accuracy lists
