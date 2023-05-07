@@ -43,10 +43,12 @@ def train():
 
     # training the network using the different dataloaders.
     # passing all of the other hyperparameters that weren't the batch size
-    TEL.TrainNetwork(Network=Network,LR=lr,train_loader=train_loader,val_loader=val_loader,test_loader=test_loader, \
-                     epochs=num_epochs,criterion=criterion,optimizer=optimizer)
+    TEL.TrainNetwork(Network=Network,LR=lr,train_loader=train_loader,val_loader=val_loader,optimizer=optimizer, \
+                     epochs=num_epochs,criterion=criterion)
 
-    # after the best hyperparameters have been found
+    # after the best hyperparameters have been found invoking the function to get the final test accuracy
+    TEL.TestNetwork(Network=Network,LR=lr,test_loader=test_loader,optimizer=optimizer, \
+                    criterion=criterion)
 # this file is the "main" function of the project, and is the entry point for execution.
 if __name__ =='__main__':
     start = time.time()

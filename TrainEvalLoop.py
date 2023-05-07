@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #   train_loader: the dataloader for the training split of the data
 #   val_loader: the dataloader for the validation split of the data
 #   test_loader: the dataloader for the hold-out test split of the data
-def TrainNetwork(Network,LR,train_loader,val_loader,test_loader,epochs,optimizer,criterion):
+def TrainNetwork(Network,LR,train_loader,val_loader,epochs,optimizer,criterion):
     # variable for timing metrics
     start = time.time()
 
@@ -81,6 +81,42 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader,epochs,optimizer
     file = open(filename,'a',encoding='utf-8')
     file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
     file.close()
+
+def TestNetwork(Network,LR,test_loader,optimizer,criterion):
+    # declaring lists to hold the calculated metrics
+    running_loss = []
+    running_accuracy = []
+    minibatch = 0
+
+    # sending the model to the GPU
+    Network.to(device=device)
+
+    # loop for going through the batches 
+    for inputs,labels in test_loader:
+        # for calculating the validation accuracy
+        start = time.time()
+        num_correct = 0
+        num_samples = 0
+        minibatch += 1
+
+        # sending the data to the GPU
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        # exectuing the prediction and calculating the loss.
+        pred = Network(inputs)
+        loss = criterion(pred,labels)
+        running_loss.append(loss.item())
+
+        # calculating the accuracy and recording it
+        _,predictions = pred.cpu().detach().max(1)
+        num_correct += (predictions == labels.cpu().detach()).sum()
+        num_samples += predictions.size(0)
+        accuracy = float(num_correct/num_samples)*100
+        running_accuracy.append(accuracy)
+        end = time.time()
+        dur = end - start
+        print(f'Test: {accuracy:0.0f}%, {dur:0.2f}seconds\n')
 
 def trainloop(dataset,model,criterion,optimizer):
     # declaring lists for holding the intermediary metrics
