@@ -54,14 +54,14 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
         accuracy.extend(average_training_accuracy)
 
         # changing the network to evaluation mode in order to calculate the validation accuracy
-        Network.eval()
-        with torch.no_grad():
-            average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
+    Network.eval()
+    with torch.no_grad():
+        average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
 
-        # appending the validation values to their respective lists.
-        vlosses.extend(average_validation_loss)
-        vaccuracy.extend(average_validation_accuracy)
-    
+    # appending the validation values to their respective lists.
+    vlosses.extend(average_validation_loss)
+    vaccuracy.extend(average_validation_accuracy)
+
     # defining reporting metrics
     name = 'model_criteria'
 
@@ -70,7 +70,7 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     dur = end-start
 
     # printing these values
-    print(name,f'Duration:{dur:0.2f},Acuracy:{accuracy[-1]:.0f},vAcuracy:{vaccuracy[-1]:.0f}',flush = True)
+    print(name,f'Duration:{dur:0.0f},Acuracy:{accuracy[-1]:.0f},vAcuracy:{vaccuracy[-1]:.0f}',flush = True)
 
     # writing these metrics to a file for later use.
     filename = 'TrainTest.txt'
@@ -149,7 +149,7 @@ def validationloop(dataset,model,criterion):
         running_accuracy.append(accuracy)
         end = time.time()
         dur = end - time
-        print(f'Validation: {accuracy:0.0f}%, {dur:0.2f}seconds\n')
+        print(f'Validation: {accuracy:0.0f}%, {dur:0.0f}seconds\n')
 
     # returning the calculated loss and accuracy lists
     return running_loss,running_accuracy
