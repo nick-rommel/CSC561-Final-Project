@@ -1,5 +1,5 @@
 # import statements
-import torch.optim as TO
+# import torch.optim as TO
 import torch.nn as nn
 import torch
 import time
@@ -15,23 +15,23 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #   train_loader: the dataloader for the training split of the data
 #   val_loader: the dataloader for the validation split of the data
 #   test_loader: the dataloader for the hold-out test split of the data
-def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
+def TrainNetwork(Network,LR,train_loader,val_loader,test_loader,epochs,optimizer,criterion):
     # variable for timing metrics
     start = time.time()
 
-    # variable for invoking loss calculations
-    criterion = nn.CrossEntropyLoss(reduction='mean')
+    # # variable for invoking loss calculations
+    # criterion = nn.CrossEntropyLoss(reduction='mean')
 
-    # in order to only train the 'head', hidden, and output layers, we define the parameters for the optimizer as such
-    # this means the ViT isn't updated as the model learns.
-    params = [
-        {'params':Network.vit.heads.parameters()},
-        {'params':Network.hidden.parameters()},
-        {'params':Network.output.parameters()}
-        ]
-    # Using AdamW as the optimizer of choice. AdamW is often used as the optimizer in
-    #   applications making use of the ViT, as it was used in ViT's introductory paper
-    optimizer = TO.AdamW(params = params,lr = LR)
+    # # in order to only train the 'head', hidden, and output layers, we define the parameters for the optimizer as such
+    # # this means the ViT isn't updated as the model learns.
+    # params = [
+    #     {'params':Network.vit.heads.parameters()},
+    #     {'params':Network.hidden.parameters()},
+    #     {'params':Network.output.parameters()}
+    #     ]
+    # # Using AdamW as the optimizer of choice. AdamW is often used as the optimizer in
+    # #   applications making use of the ViT, as it was used in ViT's introductory paper
+    # optimizer = TO.AdamW(params = params,lr = LR)
 
     # delcaring lists to hold the loss values for use in the future.
     losses = []
@@ -42,16 +42,10 @@ def TrainNetwork(Network,LR,train_loader,val_loader,test_loader):
     # sending the model to the GPU
     Network.to(device=device)
 
-    # declaring variable for number of epochs.
-    num_epochs = 20
-
     # Below is the actual training loop for the model.
-    for epoch in range(num_epochs):
+    for epoch in range(epochs):
         # Printing which epoch we are on
         print(f'Epoch# {epoch+1}')
-
-        # printing the current device as a sanity check
-        # print(torch.cuda.get_device_name(0))
 
         # ensuring that the model is set to "train" mode
         Network.train()
