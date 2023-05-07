@@ -31,6 +31,12 @@ def CustomLoader(path,batch_size,train_size,val_size,test_size):
     val_loader =    DataLoader(dataset = val_set,   batch_size = val_size,      shuffle = True, num_workers = 4)
     test_loader =   DataLoader(dataset = test_set,  batch_size = test_size,     shuffle = True, num_workers = 4)
 
+    # we open the loader up here, so we don't have to do it in the actual training loops
+    # it may shuffle the data around though, so we will have to figure out if it mislabels things.
+    train_data = [data for data in train_loader]
+    val_data = [data for data in val_loader]
+    test_data = [data for data in test_loader]
+
     # returning the dataloaders
-    return train_loader,val_loader,test_loader
+    return train_data,val_data,test_data
 

@@ -12,7 +12,7 @@ def train():
     
     # creating the dataloaders by invoking their function.
     # 64 images per patch, 800 train images, 100 validation, 99 test
-    train_loader,val_loader,test_loader = CDL.CustomLoader(path,64,800,100,99)
+    train_loader,val_loader,test_loader = CDL.CustomLoader(path,100,800,100,99)
     # instantiating the network.
     Network = VN(1,4*256)
 
