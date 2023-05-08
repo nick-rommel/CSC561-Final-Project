@@ -7,6 +7,7 @@ import torch.optim as TO
 import torch.nn as nn
 import torch
 import numpy as np
+import wandb
 
 
 # setting the device to GPU
@@ -31,12 +32,25 @@ def train():
 
     # hyperparameters
     # we are looping over 46 different learning rates, and 11 different weight decays
-    lr = [0.0015, 0.00175] #np.arange(0.001, 0.0102, 0.0002)
-    Weight_Decay = [0.01] #np.arange(0.005, 0.016, 0.001)
+    lr = np.arange(0.001, 0.0102, 0.0002)
+    Weight_Decay = np.arange(0.005, 0.016, 0.001)
     best_param_dictionary = {
         "LR": lr[0],
         "weight_decay": Weight_Decay[0]
     }
+
+    # setting up wandb
+    # Followed guide on WandB website for all related content
+    run = wandb.init(
+        # setting the project to report the metrics to
+        project="CSC561-Final-Project",
+
+        # the tracked hyperparameters
+        config={
+            "Learning_Rate": lr,
+            "Weight_Decay": Weight_Decay,
+            "Epochs": num_epochs,
+        })
 
     # declaring the variable to hold the best model
     # will be updating this each time a better model parameter combination is found in the loop below
@@ -90,6 +104,10 @@ def train():
 
                 # invoking the internal method defined for the training loop of the model
                 average_training_loss,average_training_accuracy = trainloop(train_loader,Network,criterion,optimizer)
+                # calculating actual average of the batch training accuracies and losses.
+                # there are 8 minibatches per epoch.
+                avg_train_loss = sum(average_training_loss) / 8
+                avg_train_acc = sum(average_training_accuracy) / 8
 
                 # appending returned values onto the end of their respective lists
                 losses.extend(average_training_loss)
@@ -114,6 +132,13 @@ def train():
                     # update the dictionary holding the best parameters
                     best_param_dictionary['LR']=LR
                     best_param_dictionary['weight_decay']=weight_decay
+
+                # wandb logging
+                # logging Validation and Test Accuracies/Losses for Each training epoch.
+                wandb.log({"Validation_Accuracy": average_validation_accuracy[0],
+                           "Validation_Loss": average_validation_loss[0],
+                           "Training_Accuracy": avg_train_acc,
+                           "Training_Loss": avg_train_loss})
 
                 # appending the validation values to their respective lists.
                 vlosses.extend(average_validation_loss)
@@ -285,6 +310,9 @@ def validationloop(dataset,model,criterion):
     
 # this file is the "main" function of the project, and is the entry point for execution.
 if __name__ =='__main__':
+    # logging into wandb
+    wandb.login()
+
     start = time.time()
     train()
     end = time.time()
