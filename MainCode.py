@@ -38,7 +38,6 @@ def train():
         "LR": lr[0],
         "weight_decay": Weight_Decay[0]
     }
-
     # setting up wandb
     # Followed guide on WandB website for all related content
     run = wandb.init(
