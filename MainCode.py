@@ -18,9 +18,12 @@ def train():
     # this will need to be the absolute path to the dataset's "images_original" folder.
     path = 'C:/Masters/CSC561/Final Project/Code/CSC561-Final-Project/GTZAN/images_original/'
 
-    # parameters that are remaining constant
+    # parameters that are remaining constant across all model combinations
     batch_size = 100
-    num_epochs = 25    
+    # after finishing the first hyperparameter sweep, we determined that we were getting
+    #   a severe diminishing margin of returns after 15 epochs. Therefore, 15 epochs is
+    #   our new number for training sweeps for each model combination.
+    num_epochs = 15    
 
     train_size = 800
     val_size = 100
@@ -30,8 +33,10 @@ def train():
     train_loader,val_loader,test_loader = CDL.CustomLoader(path,batch_size,train_size,val_size,test_size)
 
     # hyperparameters
-    # we are looping over 46 different learning rates, and 11 different weight decays
-    lr = np.arange(0.001, 0.0102, 0.0002)
+    # we are looping over 26 different learning rates, and 11 different weight decays
+    # Lowered the number of learing rates we are sweeping over based on results of
+    #   our first search.
+    lr = np.arange(0.001, 0.0052, 0.0002)
     Weight_Decay = np.arange(0.005, 0.016, 0.001)
     best_param_dictionary = {
         "LR": lr[0],
@@ -43,8 +48,13 @@ def train():
     # Making use of the model.state_dict()
     best_model = VN(1,4*256)
 
-    # variable for holding the current best validation accuracy
+    # variable for holding the current best validation accuracy -- NOT USED for second hyperparam sweep
     best_val_acc = 0
+
+    # variable for holding the best validation loss. This is our evaluation metric for our
+    #   second hyperparameter sweep.
+    # Setting to 100k as the calculated losses will be much lower than that.
+    best_val_loss = 100000
 
     
     # hyperparameter loop
@@ -104,14 +114,14 @@ def train():
                 with torch.no_grad():
                     average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
 
-                # if there is a new best val accuracy achieved, update current best accuracy and save the current
+                # if there is a new best val loss achieved, update current best loss and save the current
                 #   model state
-                # average_validation_accuracy is always a 1 element list.
-                if average_validation_accuracy[0] > best_val_acc:
+                # average_validation_loss is always a 1 element list.
+                if average_validation_loss[0] < best_val_loss:
                     # Print statement to show that an update has been made
-                    print(f"New best accuracy, updating metrics")
-                    # setting the new best_val_acc
-                    best_val_acc = average_validation_accuracy[0]
+                    print(f"New best loss, updating metrics")
+                    # setting the new best_val_loss
+                    best_val_loss = average_validation_loss[0]
                     # saving the current weights and biases of the model that produced these new "best" results
                     best_model.load_state_dict(Network.state_dict())
 

@@ -49,12 +49,18 @@ This file is where we handle the downloading/transfer learning of the ViT_b16 fr
 
 This folder contains two files:
 
-- `Test.txt` which contains the final accuracy and loss of the best model's inference on the test data, as well as the Learning Rate and Weight Decay values that resulted in the best model.
-- `Train_Validation.txt` which contains all of the recorded run data from training the models during the hyperparameter sweep. The metrics recorded for each model were: The Learning Rate and Weight Decay combination, the Training/Validation Accuracies and Losses, and the length of time it took to train the model.
+- `Test_Full_Spread.txt` which contains the final accuracy and loss of the best model's inference on the test data, as well as the Learning Rate and Weight Decay values that resulted in the best model. This document contains the testing metrics for the Original, Full Hyperparamter sweep.
+- `Train_Eval_Full_Spread.txt` which contains all of the recorded run data from training the models during the hyperparameter sweep. The metrics recorded for each model were: The Learning Rate and Weight Decay combination, the Training/Validation Accuracies and Losses, and the length of time it took to train the model. This file contains the Training and Validation metrics for the Original, Full Hyperparameter sweep.
+- `Test.txt` which contains the testing metrics for the second, focused hyperparameter sweep that was using validation loss, instead of validation accuracy, as the evaluation metric for choosing the best model.
+- `Train_Validation.txt` which contains the Training and Validation metrics for the the second, focused hyperparameter sweep that was using validation loss, instead of validation accuracy, as the evaluation metric for choosing the best model.
 
 ### `images` Folder:
 
-This folder contains all of the graphs we generated from the data found in the `run_data` folder.
+This folder contains all of the graphs we generated from the data found in the `run_data` folder. 
+
+The `run_1` folder contains all of the images generated from the original, large Hyperparameter sweep.
+
+The `run_2` folder contains all of the images generated from the second sweep that used validation loss, instead of validation accuracy, as the evaluation metric for choosing the best model.
 
 ### The Different Branches:
 
