@@ -7,11 +7,8 @@ import torch.optim as TO
 import torch.nn as nn
 import torch
 import os
-import numpy as np
-from ray import tune
-from ray.tune import CLIReporter
-from ray.tune.schedulers import ASHAScheduler
-from functools import partial
+import copy
+import wandb
 
 
 # setting the device to GPU
@@ -24,7 +21,7 @@ def train():
 
     # parameters
     batch_size = 100
-    num_epochs = 10    
+    num_epochs = 25    
 
     train_size = 800
     val_size = 100
@@ -34,80 +31,109 @@ def train():
     train_loader,val_loader,test_loader = CDL.CustomLoader(path,batch_size,train_size,val_size,test_size)
 
     # hyperparameters
-    lr = 0.001
+    lr = [0.001, 0.00125] #np.arange(0.0005, 0.0015, 0.00025)
+    weight_decay = 0.01
+
+    # declaring the variable to hold the best model
+    # will be updating this each time a better model parameter combination is found in the loop below
+    best_model = VN(1,4*256)
+
+    # variable for holding the current best validation accuracy
+    best_val_acc = 0
+
     
-    # instantiating the network.
-    Network = VN(1,4*256)
+    # hyperparameter loop
+    for LR in lr:
 
-    # variable for invoking loss calculations
-    criterion = nn.CrossEntropyLoss(reduction='mean')
+        # instantiating the network.
+        Network = VN(1,4*256)
 
-    # in order to only train the 'head', hidden, and output layers, we define the parameters for the optimizer as such
-    # this means the ViT isn't updated as the model learns.
-    params = [
-        {'params':Network.vit.heads.parameters()},
-        {'params':Network.hidden.parameters()},
-        {'params':Network.output.parameters()}
-        ]
+            # variable for invoking loss calculations
+        criterion = nn.CrossEntropyLoss(reduction='mean')
+
+        # in order to only train the 'head', hidden, and output layers, we define the parameters for the optimizer as such
+        # this means the ViT isn't updated as the model learns.
+        params = [
+            {'params':Network.vit.heads.parameters()},
+            {'params':Network.hidden.parameters()},
+            {'params':Network.output.parameters()}
+            ]
+
+        # Using AdamW as the optimizer of choice. AdamW is often used as the optimizer in
+        #   applications making use of the ViT, as it was used in ViT's introductory paper
+        optimizer = TO.AdamW(params=params,lr=LR, weight_decay=weight_decay)
+
+
+        ################# MODEL TRAINING ################
+        # variable for timing metrics
+        start = time.time()
+
+        # delcaring lists to hold the loss values for use in the future.
+        losses = []
+        vlosses = []
+        accuracy = []
+        vaccuracy = []
+
+        # sending the model to the GPU
+        Network.to(device=device)
+
+        # Below is the actual training loop for the model.
+        for epoch in range(num_epochs):
+            # Printing which epoch we are on
+            print(f'Epoch# {epoch+1}')
+
+            # ensuring that the model is set to "train" mode
+            Network.train()
+
+            # invoking the internal method defined for the training loop of the model
+            average_training_loss,average_training_accuracy = trainloop(train_loader,Network,criterion,optimizer)
+
+            # appending returned values onto the end of their respective lists
+            losses.extend(average_training_loss)
+            accuracy.extend(average_training_accuracy)
+
+            # changing the network to evaluation mode in order to calculate the validation accuracy
+            Network.eval()
+            with torch.no_grad():
+                average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
+
+            # if there is a new best val accuracy achieved, update current best accuracy and save the current
+            #   model state
+            # if average_validation_accuracy[0] > best_val_acc:
+            #     # testing print statement
+            #     print(f"New best accuracy, updating metrics")
+            #     best_val_acc = average_validation_accuracy
+            #     best_model.load_state_dict(Network.state_dict())
+
+            # appending the validation values to their respective lists.
+            vlosses.extend(average_validation_loss)
+            vaccuracy.extend(average_validation_accuracy)
+
     
-    # Using AdamW as the optimizer of choice. AdamW is often used as the optimizer in
-    #   applications making use of the ViT, as it was used in ViT's introductory paper
-    optimizer = TO.AdamW(params=params,lr=lr)
+    
+        # defining reporting metrics
+        name = 'model_criteria'
 
+        # calculating the running time of the training
+        end = time.time()
+        dur = end-start
 
-    ################# MODEL TRAINING ################
-    # variable for timing metrics
-    start = time.time()
+        # printing these values
+        print(name,f'Duration:{dur:0.2f},Acuracy:{accuracy[-1]:.0f},vAcuracy:{vaccuracy[-1]:.0f}',flush = True)
 
-    # delcaring lists to hold the loss values for use in the future.
-    losses = []
-    vlosses = []
-    accuracy = []
-    vaccuracy = []
+        # writing these metrics to a file for later use.
+        filename = 'TrainTest.txt'
+        file = open(filename,'a',encoding='utf-8')
+        file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
+        file.close()
 
-    # sending the model to the GPU
-    Network.to(device=device)
-
-    # Below is the actual training loop for the model.
-    for epoch in range(num_epochs):
-        # Printing which epoch we are on
-        print(f'Epoch# {epoch+1}')
-
-        # ensuring that the model is set to "train" mode
-        Network.train()
-
-        # invoking the internal method defined for the training loop of the model
-        average_training_loss,average_training_accuracy = trainloop(train_loader,Network,criterion,optimizer)
-
-        # appending returned values onto the end of their respective lists
-        losses.extend(average_training_loss)
-        accuracy.extend(average_training_accuracy)
-
-    # changing the network to evaluation mode in order to calculate the validation accuracy
-    Network.eval()
+    # calling the evaluation of the test model using the best found model
+    best_model.eval()
     with torch.no_grad():
-        average_validation_loss,average_validation_accuracy = validationloop(val_loader,Network,criterion)
+        test_model(test_loader=test_loader,Network=best_model,criterion=criterion)
 
-    # appending the validation values to their respective lists.
-    vlosses.extend(average_validation_loss)
-    vaccuracy.extend(average_validation_accuracy)
-    
-    # defining reporting metrics
-    name = 'model_criteria'
-
-    # calculating the running time of the training
-    end = time.time()
-    dur = end-start
-
-    # printing these values
-    print(name,f'Duration:{dur:0.2f},Acuracy:{accuracy[-1]:.0f},vAcuracy:{vaccuracy[-1]:.0f}',flush = True)
-
-    # writing these metrics to a file for later use.
-    filename = 'TrainTest.txt'
-    file = open(filename,'a',encoding='utf-8')
-    file.write(f'{name}\t{losses}\t{vlosses}\t{accuracy}\t{vaccuracy}\t{dur}\n')
-    file.close()
-
+# Function for evaluated
+def test_model(test_loader, Network, criterion):
     #################### TESTING THE NETWORK WITH FINAL CONFIGURATION ##########################
     # declaring lists to hold the calculated metrics
     test_running_loss = []
@@ -143,6 +169,9 @@ def train():
         end = time.time()
         dur = end - start
         print(f'Test: {accuracy:0.0f}%, {dur:0.2f}seconds\n')
+
+    # # returning the calculated loss and accuracy lists
+    # return test_running_loss,test_running_accuracy
     
 def trainloop(dataset,model,criterion,optimizer):
     # declaring lists for holding the intermediary metrics
