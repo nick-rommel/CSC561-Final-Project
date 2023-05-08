@@ -18,8 +18,8 @@ In order to run our code, you will need to clone this repo and then follow these
 1. Download the dataset from the link in the section "The Dataset". You will need to write down the **absolute** path to where this dataset is stored.
 2. On line 20 of `MainCode.py`, change the value assigned to `path` to be the absolute path to the GTZAN dataset you downloaded from the linked Kaggle page.
 3. If you would like to run the version of our code with `WandB` reporting, you will need to make the above edits to the `MainCode-WandB.py` file and do the following:
-  1. Our code integrates WandB for certain reporting metrics, so in order to run our code, you will need to have a API key for WandB as well as a project set up to store the results. After getting that information, change the `project` field on line 45 to be whatever name you desire.
-  2. Finally, run the code and log into wandb when prompted by the terminal, and the code should begin running in earnest shortly after that.
+    1. Our code integrates WandB for certain reporting metrics, so in order to run our code, you will need to have a API key for WandB as well as a project set up to store the results. After getting that information, change the `project` field on line 45 to be whatever name you desire.
+    2. Finally, run the code and log into wandb when prompted by the terminal, and the code should begin running in earnest shortly after that.
 4. If you do not wish to use `WandB` functionality, continue using the `MainCode.py` file.
 5. **NOTE:** Currently, the hyperparameter sweep is set to train 506 different model combinations. It took ~8.5 hours to run on my RTX 3080ti with 4 workers enabled for each dataloader. Feel free to change the range of the hyperparameter sweep in lines 35-36 if you do not desire to run the code for as long as we did.
 
