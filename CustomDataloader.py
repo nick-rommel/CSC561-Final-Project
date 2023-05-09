@@ -25,7 +25,6 @@ def CustomLoader(path,batch_size,train_size,val_size,test_size):
     dataset = datasets.ImageFolder(path,transform = transform)
 
     # utilizing random_split to split the data into the three groups.
-    # TODO discuss if we should do the hold-out test set on our own
     train_set,val_set,test_set = random_split(dataset,[train_size,val_size,test_size])
     train_loader =  DataLoader(dataset = train_set, batch_size = batch_size,    shuffle = True, num_workers = 4)
     val_loader =    DataLoader(dataset = val_set,   batch_size = val_size,      shuffle = True, num_workers = 4)
