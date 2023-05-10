@@ -54,13 +54,15 @@ This folder contains 4 files:
 - `Test.txt` which contains the testing metrics for the second, focused hyperparameter sweep that was using validation loss, instead of validation accuracy, as the evaluation metric for choosing the best model.
 - `Train_Validation.txt` which contains the Training and Validation metrics for the the second, focused hyperparameter sweep that was using validation loss, instead of validation accuracy, as the evaluation metric for choosing the best model.
 
-### `images` Folder:
+### `Images` Folder:
 
 This folder contains all of the graphs we generated from the data found in the `run_data` folder. 
 
-The `run_1` folder contains all of the images generated from the original, large Hyperparameter sweep.
+The `Sweep 1` folder contains all of the images generated from the original, large Hyperparameter sweep. This folder also contains subfolders for the organization of the images.
 
-The `run_2` folder contains all of the images generated from the second sweep that used validation loss, instead of validation accuracy, as the evaluation metric for choosing the best model.
+The `Sweep 2` folder contains all of the images generated from the second sweep that used validation loss, instead of validation accuracy, as the evaluation metric for choosing the best model. This folder also contains subfolders for the organization of the images.
+
+The `Overview of Image Folder.docx` contains a description of the images in all of the subfolders.
 
 ### The Different Branches:
 
